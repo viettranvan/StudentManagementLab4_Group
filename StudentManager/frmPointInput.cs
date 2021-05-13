@@ -26,6 +26,24 @@ namespace StudentManager
             cbo_SinhVien.Enabled = false;
             txt_DiemThi.Enabled = false;
 
+            // get pubkey
+            using (SqlConnection con = new SqlConnection(chuoiketnoi))
+            {
+                con.Open();
+
+                string queryPubKey = "SELECT PUBKEY FROM NHANVIEN WHERE MANV = '" + frmLogin.manvLogin + "'";
+                SqlCommand cmdPubkey = new SqlCommand(queryPubKey, con);
+                SqlDataReader readerPubkey = cmdPubkey.ExecuteReader();
+                while (readerPubkey.Read())
+                {
+                    pubkey = readerPubkey.GetString(0);
+                }
+                cmdPubkey.Dispose();
+                readerPubkey.Close();
+
+                con.Close();
+            }
+
             // đổ dữ liêu vào cbo_HocPhan
             cbo_HocPhan.Items.Clear();
             string query = "SELECT TENHP FROM HOCPHAN ";
@@ -135,7 +153,6 @@ namespace StudentManager
         private void btn_Refresh_Click(object sender, System.EventArgs e)
         {
             dgv_DiemThi.DataSource = GetAllDiemThi(chuoiketnoi).Tables[0];
-            
         }
 
         private void btn_Save_Click(object sender, System.EventArgs e)
@@ -171,7 +188,10 @@ namespace StudentManager
                 diemthi = txt_DiemThi.Text;
 
                 string queryIns = "INSERT INTO BANGDIEM VALUES (@masv,@mahp,@diemthi)";
-                byte[] data = Encoding.ASCII.GetBytes(txt_DiemThi.Text); ;
+
+                string diemRSA = Encryptor.EncryptionRSA(txt_DiemThi.Text, pubkey);
+                byte[] data = Encoding.ASCII.GetBytes(diemRSA); ;
+
                 SqlCommand cmdIns = new SqlCommand(queryIns, con);
                 cmdIns.Parameters.Add("@masv", SqlDbType.VarChar).Value = masv;
                 cmdIns.Parameters.Add("@mahp", SqlDbType.VarChar).Value = mahp;
@@ -192,14 +212,31 @@ namespace StudentManager
             {
                 if (e.Value != null)
                 {
-                    byte[] diemthi = (byte[])e.Value;
-                    string diemthiString = Encoding.ASCII.GetString(diemthi);
-                    e.Value = diemthiString;
-                    e.FormattingApplied = true;
+                    byte[] salaryByte = (byte[])e.Value;
+                    string salaryString = Encoding.UTF8.GetString(salaryByte);
+                    
+                    
+                    if(frmLogin.manvLogin == "NV01" || frmLogin.manvLogin == "nv01" || frmLogin.manvLogin == "Nv01" || frmLogin.manvLogin == "nV01")
+                    {
+                        string salaryDescyptor = Encryptor.DecryptionRSA(salaryString, pubkey);
+                        e.Value = salaryDescyptor;
+                        e.FormattingApplied = true;
+                    }
+                    else
+                    {
+                        e.Value = salaryString;
+                        e.FormattingApplied = true;
+                    }
+                    
                 }
                 else
                     e.FormattingApplied = false;
             }
+        }
+
+        private void dgv_DiemThi_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }

@@ -20,6 +20,7 @@ namespace StudentManager
         }
         string connectionString = ConfigurationManager.ConnectionStrings["QlySV"].ConnectionString.ToString();
         SqlConnection con;
+        
 
         string Key = "4401104244VIETTV";
 
@@ -95,50 +96,27 @@ namespace StudentManager
    
         private void btn_Delete_Click_1(object sender, EventArgs e)
         {
-            string text1 = Encryptor.EncryptionRSA("123456");
-            string text2 = Encryptor.DecryptionRSA(text1);
-
-            MessageBox.Show("text1: " + text1 + "\nText2: "  +text2 );
+            
 
         }
 
         private void btn_update_Click_1(object sender, EventArgs e)
         {
-            byte[] salaryByte = (byte[])dgv_Employee[3,0].Value;
-            string salaryString = Encoding.UTF8.GetString(salaryByte);
-            MessageBox.Show(salaryString);
+            
         }
 
         // format Column Luong byte array => to string
         private void dgv_Employee_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            string pubkey = "";
-            string connectionString = ConfigurationManager.ConnectionStrings["QlySV"].ConnectionString.ToString();
-
-            using (SqlConnection con = new SqlConnection(connectionString))
-            {
-                con.Open();
-
-                string queryPubKey = "SELECT PUBKEY FROM NHANVIEN WHERE MANV = '" + frmLogin.manvLogin + "'";
-                SqlCommand cmdPubkey = new SqlCommand(queryPubKey, con);
-                SqlDataReader readerPubkey = cmdPubkey.ExecuteReader();
-                while (readerPubkey.Read())
-                {
-                    pubkey = readerPubkey.GetString(0);
-                }
-                cmdPubkey.Dispose();
-                readerPubkey.Close();
-
-                con.Close();
-            }
             if (e.ColumnIndex == 3)
             {
                 if (e.Value != null)
                 {
+                    
                     byte[] salaryByte = (byte[])e.Value;
                     string salaryString = Encoding.UTF8.GetString(salaryByte);
-                    string salaryDescyptor = Encryptor.DecryptionRSA(salaryString);
-                    e.Value = salaryDescyptor;
+                    //string salaryDescyptor = Encryptor.DecryptionRSA(salaryString, pubkey);
+                    e.Value = salaryString;
                     e.FormattingApplied = true;
                 }
                 else
@@ -152,8 +130,25 @@ namespace StudentManager
             txt_fullname.Text = dgv_Employee.CurrentRow.Cells[1].Value.ToString();
             txt_Email.Text = dgv_Employee.CurrentRow.Cells[2].Value.ToString();
             byte[] salaryByte = (byte[])dgv_Employee.CurrentRow.Cells[3].Value;
+            string pubkey = "";
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+
+                string queryPubKey = "SELECT PUBKEY FROM NHANVIEN WHERE MANV = '" + dgv_Employee.CurrentRow.Cells[0].Value.ToString() + "'";
+                SqlCommand cmdPubkey = new SqlCommand(queryPubKey, con);
+                SqlDataReader readerPubkey = cmdPubkey.ExecuteReader();
+                while (readerPubkey.Read())
+                {
+                    pubkey = readerPubkey.GetString(0);
+                }
+                cmdPubkey.Dispose();
+                readerPubkey.Close();
+
+                con.Close();
+            }
             string salaryString = Encoding.UTF8.GetString(salaryByte);
-            string salaryDescyptor = Encryptor.DecryptAES(salaryString, Key);
+            string salaryDescyptor = Encryptor.DecryptionRSA(salaryString, pubkey);
             txt_salary.Text = salaryDescyptor;
         }
 
@@ -163,8 +158,9 @@ namespace StudentManager
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    string pubkey = Encryptor.generatePublicKey();
-                    string salary = Encryptor.EncryptionRSA(txt_salary.Text);
+                    string publicKeyString = Encryptor.generatePublicKey();
+                       
+                    string salary = Encryptor.EncryptionRSA(txt_salary.Text, publicKeyString);
                     string password = Encryptor.SHA1Hash(txt_password.Text);
                     using (SqlCommand cmd = new SqlCommand("SP_INS_PUBLIC_ENCRYPT_NHANVIEN", con))
                     {
@@ -176,11 +172,12 @@ namespace StudentManager
                         cmd.Parameters.Add("@luongcb", SqlDbType.VarChar).Value = salary;
                         cmd.Parameters.Add("@tendn", SqlDbType.NVarChar).Value = txt_username.Text;
                         cmd.Parameters.Add("@matkhau", SqlDbType.VarChar).Value = password;
-                        cmd.Parameters.Add("@pubkey", SqlDbType.VarChar).Value = pubkey;
+                        cmd.Parameters.Add("@pubkey", SqlDbType.VarChar).Value = publicKeyString;
                         con.Open();
                         cmd.ExecuteNonQuery();
                         MessageBox.Show("Thêm mới thành công", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         dgv_Employee.DataSource = GetAllNhanVien(connectionString).Tables[0];
+                        CancelState();
                     }
                 }
             }
@@ -190,6 +187,11 @@ namespace StudentManager
         private void btn_cancel_Click(object sender, EventArgs e)
         {
             CancelState();
+        }
+
+        private void btn_exit_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

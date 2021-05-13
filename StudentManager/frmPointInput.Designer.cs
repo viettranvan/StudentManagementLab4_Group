@@ -160,6 +160,7 @@ namespace StudentManager
             this.dgv_DiemThi.RowTemplate.Height = 25;
             this.dgv_DiemThi.Size = new System.Drawing.Size(501, 150);
             this.dgv_DiemThi.TabIndex = 10;
+            this.dgv_DiemThi.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_DiemThi_CellClick);
             this.dgv_DiemThi.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgv_DiemThi_CellFormatting);
             // 
             // MaSV

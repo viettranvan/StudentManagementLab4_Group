@@ -194,7 +194,6 @@ namespace StudentManager
                 }
             }
             
-            MessageBox.Show(manv);
         }
 
         private void btn_Xoa_Click(object sender, System.EventArgs e)

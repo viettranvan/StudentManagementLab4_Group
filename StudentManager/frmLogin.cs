@@ -2,7 +2,8 @@
 using System.Windows.Forms;
 using System.Configuration;
 using System.Data.SqlClient;
-
+using System.Text;
+using System.Data;
 
 namespace StudentManager
 {
@@ -23,59 +24,17 @@ namespace StudentManager
 
             string username = txt_Username.Text;
             string password = txt_Password.Text;
-            #region Login LabCaNhan
-            /*
-            try
-            {
-                con.Open();
-                string md5 = "CONVERT(VARCHAR(100), HashBytes('MD5', '" + password + "'), 2)";
-                string sha1 = "CONVERT(VARCHAR(100), HashBytes('SHA1', '" + password + "'), 2)";
-
-                string querySV = "select * from SINHVIEN where TENDN='" + username + "'AND MATKHAU= CAST(" + md5 + " as varbinary(max))";
-                string queryNV = "select * from NHANVIEN where TENDN='" + username + "'AND MATKHAU= CAST(" + sha1 + " as varbinary(max))";
-                
-                SqlCommand cmdSV = new SqlCommand(querySV, con);
-                SqlDataReader readerSV = cmdSV.ExecuteReader();
-
-
-                if (readerSV.Read())
-                {
-                    MessageBox.Show("Đăng nhập hệ thống thành công", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    cmdSV.Dispose();
-                    readerSV.Close();
-
-                    SqlCommand cmdNV = new SqlCommand(queryNV, con);
-                    SqlDataReader readerNV = cmdNV.ExecuteReader();
-
-                    if (readerNV.Read())
-                    {
-                        MessageBox.Show("Đăng nhập hệ thống thành công", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("Tên đăng nhập hoặc mật khẩu không hợp lệ!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Không thể kết nối đến server!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            */
-            #endregion
 
             #region Login LabNhom
             try
             {
                 con.Open();
-                string sha1 = "CONVERT(VARCHAR(100), HashBytes('SHA1', '" + password + "'), 2)";
-                string queryNV = "select * from NHANVIEN where MANV='" + username + "'AND MATKHAU= CAST(" + sha1 + " as varbinary(max))";
-
+                string Sha1Hash = Encryptor.SHA1Hash(password);
+                byte[] theBytesNV = Encoding.UTF8.GetBytes(Sha1Hash);
+                string queryNV = "SELECT * FROM NHANVIEN WHERE MANV='" + username + "'AND MATKHAU= @matkhauNV";
                 SqlCommand cmdNV = new SqlCommand(queryNV, con);
+                cmdNV.Parameters.Add("@matkhauNV", SqlDbType.VarBinary).Value = theBytesNV;
+
                 SqlDataReader readerNV = cmdNV.ExecuteReader();
 
                 if (readerNV.Read())

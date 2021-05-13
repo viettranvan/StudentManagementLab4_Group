@@ -53,6 +53,19 @@ namespace StudentManager
             btn_cancel.Enabled = true;
         }
 
+        private void UpdateState()
+        {
+            btn_Add.Enabled = false;
+            btn_Delete.Enabled = false;
+            btn_update.Enabled = false;
+            btn_exit.Enabled = false;
+            btn_Save.Enabled = true;
+            btn_cancel.Enabled = true;
+            txt_username.Enabled = false;
+            txt_EmployeeID.Enabled = false;
+            txt_password.Enabled = false;
+        }
+
         private void CancelState()
         {
             txt_Email.Clear();
@@ -93,16 +106,40 @@ namespace StudentManager
             AddState();
             action = "ADD";
         }
+
    
         private void btn_Delete_Click_1(object sender, EventArgs e)
         {
-            
+            string manv = txt_EmployeeID.Text;
+            if (manv.Length == 0)
+            {
+                MessageBox.Show("Vui lòng chọn lớp muốn xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            else
+            {
+                if (DialogResult.Yes == MessageBox.Show("Bạn có muốn xóa không ?", "Thông báo",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question))
+                {
+                    string delete = "DELETE FROM NHANVIEN WHERE MANV='" + manv + "'";
+                    using (SqlConnection con = new SqlConnection(connectionString))
+                    {
+                        con.Open();
+                        SqlCommand cmdDel = new SqlCommand(delete, con);
+                        cmdDel.ExecuteNonQuery();
+                        MessageBox.Show("Xóa thành công", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        dgv_Employee.DataSource = GetAllNhanVien(connectionString).Tables[0];
+                        cmdDel.Dispose();
+                        con.Close();
+                    }
+                }
+            }
 
         }
 
         private void btn_update_Click_1(object sender, EventArgs e)
         {
-            
+            UpdateState();
+            action = "UPDATE";
         }
 
         // format Column Luong byte array => to string
@@ -165,7 +202,6 @@ namespace StudentManager
                     using (SqlCommand cmd = new SqlCommand("SP_INS_PUBLIC_ENCRYPT_NHANVIEN", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-
                         cmd.Parameters.Add("@manv", SqlDbType.VarChar).Value = txt_EmployeeID.Text;
                         cmd.Parameters.Add("@hoten", SqlDbType.NVarChar).Value = txt_fullname.Text;
                         cmd.Parameters.Add("@email", SqlDbType.NVarChar).Value = txt_Email.Text;
@@ -179,6 +215,51 @@ namespace StudentManager
                         dgv_Employee.DataSource = GetAllNhanVien(connectionString).Tables[0];
                         CancelState();
                     }
+                }
+            }else if(action == "UPDATE")
+            {
+                txt_EmployeeID.Enabled = false;
+                txt_username.Enabled = false;
+                if(txt_EmployeeID.Text == "")
+                {
+                    MessageBox.Show("Vui lòng chọn nhân viên muốn chỉnh sửa", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    using (SqlConnection con = new SqlConnection(connectionString))
+                    {
+                        con.Open();
+
+                        string publicKeyString = "";
+                        string queryPubKey = "SELECT PUBKEY FROM NHANVIEN WHERE MANV = '" + txt_EmployeeID.Text + "'";
+                        SqlCommand cmdPubkey = new SqlCommand(queryPubKey, con);
+                        SqlDataReader readerPubkey = cmdPubkey.ExecuteReader();
+                        while (readerPubkey.Read())
+                        {
+                            publicKeyString = readerPubkey.GetString(0);
+                        }
+                        cmdPubkey.Dispose();
+                        readerPubkey.Close();
+                        string salary = Encryptor.EncryptionRSA(txt_salary.Text, publicKeyString);
+                        string password = Encryptor.SHA1Hash(txt_password.Text);
+                        byte[] salaryBin = Encoding.ASCII.GetBytes(salary);
+                        byte[] passwordBin = Encoding.ASCII.GetBytes(password);
+                        string update = "update NHANVIEN set EMAIL=@email, HOTEN=@hoten, LUONG=@luong where MANV='" + txt_EmployeeID.Text + "'";
+                        SqlCommand cmdUdt = new SqlCommand(update, con);
+                        cmdUdt.Parameters.Add("@hoten", SqlDbType.NVarChar).Value = txt_fullname.Text;
+                        cmdUdt.Parameters.Add("@email", SqlDbType.NVarChar).Value = txt_Email.Text;
+                        cmdUdt.Parameters.Add("@luong", SqlDbType.VarBinary).Value = salaryBin;
+                        
+
+                        cmdUdt.ExecuteNonQuery();
+
+                        MessageBox.Show("Cập nhật thành công", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        dgv_Employee.DataSource = GetAllNhanVien(connectionString).Tables[0];
+                        CancelState();
+                        cmdUdt.Dispose();
+                        con.Close();
+                    }
+
                 }
             }
             

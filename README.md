@@ -1,8 +1,8 @@
-# Lab3 - BMSCSDL - StudentManagementLab4_Group
+# Lab4 - BMSCSDL - StudentManagementLab4_Group
 
 
 # Member
-  1. Trần Văn Việt - 44.01.104.244
+	1. Trần Văn Việt - 44.01.104.244
 	2. Lê Minh Trung - 44.01.104.233
 	3. Trần Duy Thịnh - 44.01.104.218 
 	4. Nguyễn Thị Thùy Trang - 44.01.104.228

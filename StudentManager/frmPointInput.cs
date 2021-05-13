@@ -146,6 +146,7 @@ namespace StudentManager
         private void btn_Refresh_Click(object sender, System.EventArgs e)
         {
             dgv_DiemThi.DataSource = GetAllDiemThi(chuoiketnoi).Tables[0];
+            
         }
 
         private void btn_Save_Click(object sender, System.EventArgs e)

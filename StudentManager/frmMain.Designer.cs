@@ -34,11 +34,12 @@ namespace StudentManager
             this.btn_QLLopHoc = new System.Windows.Forms.Button();
             this.btn_NhapDiem = new System.Windows.Forms.Button();
             this.btn_Thoat = new System.Windows.Forms.Button();
+            this.btn_QlyNhanVien = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_QLSinhVien
             // 
-            this.btn_QLSinhVien.Location = new System.Drawing.Point(57, 12);
+            this.btn_QLSinhVien.Location = new System.Drawing.Point(12, 12);
             this.btn_QLSinhVien.Name = "btn_QLSinhVien";
             this.btn_QLSinhVien.Size = new System.Drawing.Size(112, 42);
             this.btn_QLSinhVien.TabIndex = 0;
@@ -59,7 +60,7 @@ namespace StudentManager
             // 
             // btn_QLLopHoc
             // 
-            this.btn_QLLopHoc.Location = new System.Drawing.Point(207, 12);
+            this.btn_QLLopHoc.Location = new System.Drawing.Point(146, 12);
             this.btn_QLLopHoc.Name = "btn_QLLopHoc";
             this.btn_QLLopHoc.Size = new System.Drawing.Size(110, 42);
             this.btn_QLLopHoc.TabIndex = 2;
@@ -69,7 +70,7 @@ namespace StudentManager
             // 
             // btn_NhapDiem
             // 
-            this.btn_NhapDiem.Location = new System.Drawing.Point(347, 12);
+            this.btn_NhapDiem.Location = new System.Drawing.Point(407, 12);
             this.btn_NhapDiem.Name = "btn_NhapDiem";
             this.btn_NhapDiem.Size = new System.Drawing.Size(119, 42);
             this.btn_NhapDiem.TabIndex = 3;
@@ -87,11 +88,22 @@ namespace StudentManager
             this.btn_Thoat.UseVisualStyleBackColor = true;
             this.btn_Thoat.Click += new System.EventHandler(this.btn_Thoat_Click);
             // 
+            // btn_QlyNhanVien
+            // 
+            this.btn_QlyNhanVien.Location = new System.Drawing.Point(272, 12);
+            this.btn_QlyNhanVien.Name = "btn_QlyNhanVien";
+            this.btn_QlyNhanVien.Size = new System.Drawing.Size(110, 42);
+            this.btn_QlyNhanVien.TabIndex = 5;
+            this.btn_QlyNhanVien.Text = "QL Nhân Viên";
+            this.btn_QlyNhanVien.UseVisualStyleBackColor = true;
+            this.btn_QlyNhanVien.Click += new System.EventHandler(this.btn_QlyNhanVien_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(538, 151);
+            this.Controls.Add(this.btn_QlyNhanVien);
             this.Controls.Add(this.btn_Thoat);
             this.Controls.Add(this.btn_NhapDiem);
             this.Controls.Add(this.btn_QLLopHoc);
@@ -114,6 +126,7 @@ namespace StudentManager
         private System.Windows.Forms.Button btn_NhapDiem;
         private System.Windows.Forms.Button btn_Thoat;
         public System.Windows.Forms.Button btn_DangNhap;
+        private System.Windows.Forms.Button btn_QlyNhanVien;
     }
 }
 

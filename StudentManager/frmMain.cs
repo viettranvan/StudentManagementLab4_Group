@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Configuration;
+using System.Data.SqlClient;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 
 namespace StudentManager
@@ -81,6 +84,7 @@ namespace StudentManager
         {
             Application.Exit();
 
+            
         }
 
         private void btn_DangNhap_Click(object sender, EventArgs e)
@@ -102,6 +106,23 @@ namespace StudentManager
                 frm.Show();
                 this.Hide();
 
+            }
+        }
+
+        private void btn_QlyNhanVien_Click(object sender, EventArgs e)
+        {
+            if (!isLogin)
+            {
+                MessageBox.Show("Vui lòng đăng nhập", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                var frm = new frmEmployeeManagement();
+                frm.Location = this.Location;
+                frm.StartPosition = FormStartPosition.Manual;
+                frm.FormClosing += delegate { this.Show(); };
+                frm.Show();
+                this.Hide();
             }
         }
     }

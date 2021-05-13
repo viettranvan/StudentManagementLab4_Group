@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text;
 using System.Windows.Forms;
 
 namespace StudentManager
@@ -37,20 +38,10 @@ namespace StudentManager
                 {
                     cbo_HocPhan.Items.Add(reader.GetString(0));// add dữ liệu vào cbo
                 }
-                // giải phóng
                 cmd.Dispose();
                 reader.Close();
 
-                string queryPubKey = "SELECT PUBKEY FROM NHANVIEN WHERE MANV = '" + frmLogin.manvLogin + "'";
-                SqlCommand cmdPubkey = new SqlCommand(queryPubKey, con);
-                SqlDataReader readerPubkey = cmdPubkey.ExecuteReader();
-                while (readerPubkey.Read())
-                {
-                    pubkey = readerPubkey.GetString(0); // add dữ liệu vào cbo
-                }
-                cmdPubkey.Dispose();
-                readerPubkey.Close();
-
+             
                 con.Close();
             }
 
@@ -59,9 +50,7 @@ namespace StudentManager
         DataSet GetAllDiemThi(string chuoiketnoi)
         {
             DataSet data = new DataSet();
-            string query = "SELECT HOTEN,MAHP,CONVERT(VARCHAR(MAX)," +
-                "DECRYPTBYASYMKEY(ASYMKEY_ID('"+ pubkey  +"'),DIEMTHI,N'" + frmLogin.passLogin +"')) " +
-                "AS DIEMTHI FROM BANGDIEM,SINHVIEN WHERE SINHVIEN.MASV = BANGDIEM.MASV";
+            string query = "SELECT HOTEN,MAHP,DIEMTHI FROM BANGDIEM,SINHVIEN WHERE SINHVIEN.MASV = BANGDIEM.MASV";
             using (SqlConnection con = new SqlConnection(chuoiketnoi))
             {
                 con.Open();
@@ -181,9 +170,12 @@ namespace StudentManager
 
                 diemthi = txt_DiemThi.Text;
 
-                string queryIns = "INSERT INTO BANGDIEM VALUES ('" +masv +"','"+ mahp +
-                    "',ENCRYPTBYASYMKEY(ASYMKEY_ID('"+pubkey+"'),'" + diemthi +"'))";
+                string queryIns = "INSERT INTO BANGDIEM VALUES (@masv,@mahp,@diemthi)";
+                byte[] data = Encoding.ASCII.GetBytes(txt_DiemThi.Text); ;
                 SqlCommand cmdIns = new SqlCommand(queryIns, con);
+                cmdIns.Parameters.Add("@masv", SqlDbType.VarChar).Value = masv;
+                cmdIns.Parameters.Add("@mahp", SqlDbType.VarChar).Value = mahp;
+                cmdIns.Parameters.Add("@diemthi", SqlDbType.VarBinary).Value = data;
                 cmdIns.ExecuteNonQuery();
 
                 MessageBox.Show("Thêm mới thành công", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -191,6 +183,22 @@ namespace StudentManager
                 cmdIns.Dispose();
                 setState2();
                 con.Close();
+            }
+        }
+
+        private void dgv_DiemThi_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.ColumnIndex == 2)
+            {
+                if (e.Value != null)
+                {
+                    byte[] diemthi = (byte[])e.Value;
+                    string diemthiString = Encoding.ASCII.GetString(diemthi);
+                    e.Value = diemthiString;
+                    e.FormattingApplied = true;
+                }
+                else
+                    e.FormattingApplied = false;
             }
         }
     }
